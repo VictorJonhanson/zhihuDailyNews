@@ -1,5 +1,6 @@
 package com.example.jonhanson.zhihudailynews.Service;
 
+import com.example.jonhanson.zhihudailynews.Model.NewsBody;
 import com.example.jonhanson.zhihudailynews.Model.NewsInfo;
 import com.example.jonhanson.zhihudailynews.utils.StreamTool;
 
@@ -14,36 +15,21 @@ import java.util.List;
 
 public class NewsService {
     public static List<NewsInfo> getJsonLastNews()throws Exception{
-//        new Thread(new Runnable(){
-//            @Override
-//            public void run() {
-                String path = "https://news-at.zhihu.com/api/4/news/latest";
-//                try {
-                   URL url = new URL(path);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setConnectTimeout(5 * 1000);
-                    conn.setRequestMethod("GET");
-                    conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-                    if (conn.getResponseCode() == 200) {
-                        InputStream inputStream = conn.getInputStream();
-                        return parseJSON(inputStream);
-                    }
-//                } catch (MalformedURLException e) {
-//                    e.printStackTrace();
-//                } catch (ProtocolException e) {
-//                    e.printStackTrace();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
+        String path = "http://news-at.zhihu.com/api/4/news/latest";
+        URL url = new URL(path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(5 * 1000);
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+        if (conn.getResponseCode() == 200) {
+            InputStream inputStream = conn.getInputStream();
+            return parseJSON(inputStream);
+        }
         return null;
     }
 
     private static List<NewsInfo> parseJSON(InputStream inputStream) throws Exception{
-        List<NewsInfo> newses = new ArrayList<NewsInfo>();
+        List<NewsInfo> newses = new ArrayList<>();
         byte[] data = StreamTool.read(inputStream);
         String json = new String(data);
         JSONObject object = new JSONObject(json);
@@ -54,5 +40,28 @@ public class NewsService {
             newses.add(news);
         }
         return newses;
+    }
+
+    public static List<NewsBody> ShowDetail(String newsid) throws Exception{
+        String path = "http://news-at.zhihu.com/api/4/news/" + newsid;
+        URL url = new URL(path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(5 * 1000);
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+        if (conn.getResponseCode() == 200) {
+            InputStream inputStream = conn.getInputStream();
+            return parseWeb(inputStream);
+        }
+        return null;
+    }
+
+    private static List<NewsBody> parseWeb(InputStream inputStream) throws Exception{
+        List<NewsBody> body = new ArrayList<>();
+        byte[] data = StreamTool.read(inputStream);
+        String json = new String(data);
+        JSONObject object = new JSONObject(json);
+        NewsBody news = new NewsBody(object.getString("body"));
+        body.add(news);
+        return body;
     }
 }
