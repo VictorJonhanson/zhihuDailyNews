@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import com.example.jonhanson.zhihudailynews.Model.NewsBody;
 import com.example.jonhanson.zhihudailynews.Model.NewsInfo;
@@ -21,19 +22,18 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (android.os.Build.VERSION.SDK_INT > 9) {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-        }
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
-       ListView listView = (ListView) this.findViewById(R.id.listView);
+        ListView listView = (ListView) this.findViewById(R.id.listView);
         try {
             final List<NewsInfo> news = NewsService.getJsonLastNews();
             List<HashMap<String, Object>> data = new ArrayList<>();
@@ -67,7 +67,7 @@ public class MainActivity extends Activity {
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                   NewsInfo newsInfo = news.get(position);
+                    NewsInfo newsInfo = news.get(position);
                    String newsid = newsInfo.getId();
                     try {
                         List<NewsBody> body = NewsService.ShowDetail(newsid);
@@ -83,5 +83,25 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static Boolean isQuit = false;
+    private Timer timer = new Timer();
+    @Override
+    public void onBackPressed() {
+        if(!isQuit) {
+            isQuit = true;
+            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    isQuit = false;
+                }
+            };
+            timer.schedule(task, 2000);
+        }else{
+            finish();
+        }
+
     }
 }
