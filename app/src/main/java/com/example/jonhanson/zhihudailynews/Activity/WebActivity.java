@@ -24,10 +24,12 @@ public class WebActivity extends AppCompatActivity {
         //使用Jsoup调整图片宽度为屏幕宽度
         final Document doc = Jsoup.parse(body);
         final Elements imgs = doc.getElementsByTag("img");
+        //除了第一张头像图片其余的图片都指定宽度为屏幕宽度
         for (int i = 1; i < imgs.size(); i++) {
             imgs.get(i).attr("style", "width: 100%; height: auto;");
         }
         webView.setWebViewClient(new WebViewClient());
+        //指定webView加载本地富文本内容为处理后的doc字符串富文本
         webView.loadDataWithBaseURL(null, doc.toString(), "text/html", "UTF-8", null);
     }
 }

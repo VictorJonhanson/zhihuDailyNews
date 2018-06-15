@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NewsService {
+    //向知乎API发起请求获取json数据
     public static List<NewsInfo> getJsonLastNews()throws Exception{
         String path = "http://news-at.zhihu.com/api/4/news/latest";
         URL url = new URL(path);
@@ -28,12 +29,13 @@ public class NewsService {
         return null;
     }
 
+    //获取得到的新闻数据进行解析
     private static List<NewsInfo> parseJSON(InputStream inputStream) throws Exception{
         List<NewsInfo> newses = new ArrayList<>();
         byte[] data = StreamTool.read(inputStream);
         String json = new String(data);
         JSONObject object = new JSONObject(json);
-        JSONArray array = object.getJSONArray("top_stories");
+        JSONArray array = object.getJSONArray("top_stories");//获取的数据头为top_stories
         for(int i = 0; i < array.length(); i++){
             JSONObject jsonObject = array.getJSONObject(i);
             NewsInfo news = new NewsInfo(jsonObject.getString("image"),jsonObject.getString("id"),jsonObject.getString("title"));
@@ -42,6 +44,7 @@ public class NewsService {
         return newses;
     }
 
+    //根据新闻id获取指定新闻的json数据
     public static List<NewsBody> ShowDetail(String newsid) throws Exception{
         String path = "http://news-at.zhihu.com/api/4/news/" + newsid;
         URL url = new URL(path);
@@ -55,6 +58,7 @@ public class NewsService {
         return null;
     }
 
+    //获取得到的新闻内容进行解析
     private static List<NewsBody> parseWeb(InputStream inputStream) throws Exception{
         List<NewsBody> body = new ArrayList<>();
         byte[] data = StreamTool.read(inputStream);

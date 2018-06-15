@@ -30,12 +30,13 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //关闭线程审查，使联网操作可以在主线程上进行
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
         ListView listView = (ListView) this.findViewById(R.id.listView);
         try {
-            final List<NewsInfo> news = NewsService.getJsonLastNews();
+            final List<NewsInfo> news = NewsService.getJsonLastNews();//调用方法获取解析后的新闻列表
             List<HashMap<String, Object>> data = new ArrayList<>();
             if (news != null) {
                 for(NewsInfo newsInfo : news){
@@ -48,6 +49,7 @@ public class MainActivity extends Activity {
                     data.add(item);
                 }
             }
+            //给适配器绑定数据
             SimpleAdapter adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
                     new String[]{"image","title"}, new int[]{R.id.imageView, R.id.title});
             adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
@@ -64,13 +66,14 @@ public class MainActivity extends Activity {
             });
             listView.setAdapter(adapter);
 
+            //新闻列表的点击详情事件处理
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     NewsInfo newsInfo = news.get(position);
-                   String newsid = newsInfo.getId();
+                    String newsid = newsInfo.getId();
                     try {
-                        List<NewsBody> body = NewsService.ShowDetail(newsid);
+                        List<NewsBody> body = NewsService.ShowDetail(newsid);//传递参数给显示详情方法，参数为新闻id
                         String bodystr = (body.get(0).getBody());
                         Intent intent = new Intent(MainActivity.this, WebActivity.class);
                         intent.putExtra("body", bodystr);
@@ -85,6 +88,7 @@ public class MainActivity extends Activity {
         }
     }
 
+    //连续点击两次返回键退出应用
     private static Boolean isQuit = false;
     private Timer timer = new Timer();
     @Override
