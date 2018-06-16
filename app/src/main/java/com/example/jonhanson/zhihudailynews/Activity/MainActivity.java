@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -26,6 +27,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends Activity {
+    ListView listView = (ListView) this.findViewById(R.id.listView);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,8 +35,6 @@ public class MainActivity extends Activity {
         //关闭线程审查，使联网操作可以在主线程上进行
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
-        ListView listView = (ListView) this.findViewById(R.id.listView);
         try {
             final List<NewsInfo> news = NewsService.getJsonLastNews();//调用方法获取解析后的新闻列表
             List<HashMap<String, Object>> data = new ArrayList<>();
@@ -86,7 +86,31 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                        @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (firstVisibleItem == 0) {
+                    View firstVisibleItemView = listView.getChildAt(0);
+                    if (firstVisibleItemView != null && firstVisibleItemView.getTop() == 0) {
+                        //滑动到顶部的操作
+                    }
+                } else if ((firstVisibleItem + visibleItemCount) == totalItemCount) {
+                    View lastVisibleItemView = listView.getChildAt(listView.getChildCount() - 1);
+                    if (lastVisibleItemView != null && lastVisibleItemView.getBottom() == listView.getHeight()) {
+                        //滑动到底部的操作
+                    }
+                }
+            }
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                //无内容操作。
+            }
+        });
     }
+
+
 
     //连续点击两次返回键退出应用
     private static Boolean isQuit = false;
