@@ -10,7 +10,9 @@ import org.json.JSONObject;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class NewsService {
@@ -35,10 +37,11 @@ public class NewsService {
         byte[] data = StreamTool.read(inputStream);
         String json = new String(data);
         JSONObject object = new JSONObject(json);
-        JSONArray array = object.getJSONArray("top_stories");//获取的数据头为top_stories
+        JSONArray array = object.getJSONArray("stories");//获取的数据头为stories
         for(int i = 0; i < array.length(); i++){
             JSONObject jsonObject = array.getJSONObject(i);
-            NewsInfo news = new NewsInfo(jsonObject.getString("image"),jsonObject.getString("id"),jsonObject.getString("title"));
+            JSONArray image = jsonObject.getJSONArray("images");
+            NewsInfo news = new NewsInfo(image.getString(0),jsonObject.getString("id"),jsonObject.getString("title"));
             newses.add(news);
         }
         return newses;
@@ -67,5 +70,25 @@ public class NewsService {
         NewsBody news = new NewsBody(object.getString("body"));
         body.add(news);
         return body;
+    }
+
+
+
+    public static List<NewsInfo> getJsonBeforeNews() throws Exception{
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");//获取当前年月日
+        Date date = new Date(System.currentTimeMillis());
+        String beforedate = simpleDateFormat.format(date);
+        int num = Integer.parseInt(beforedate);
+        String path = "http://news.at.zhihu.com/api/4/news/before/" + (num);
+        URL url = new URL(path);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setConnectTimeout(5 * 1000);
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+        if (conn.getResponseCode() == 200) {
+            InputStream inputStream = conn.getInputStream();
+            return parseJSON(inputStream);
+        }
+        return null;
     }
 }

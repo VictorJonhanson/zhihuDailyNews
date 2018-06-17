@@ -27,7 +27,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends Activity {
-    ListView listView = (ListView) this.findViewById(R.id.listView);
+    private ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +49,7 @@ public class MainActivity extends Activity {
                     data.add(item);
                 }
             }
+            listView = (ListView) this.findViewById(R.id.listView);
             //给适配器绑定数据
             SimpleAdapter adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
                     new String[]{"image","title"}, new int[]{R.id.imageView, R.id.title});
@@ -87,18 +88,53 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
+        //滑动列表到顶部以及底部的操作
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
                         @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (firstVisibleItem == 0) {
                     View firstVisibleItemView = listView.getChildAt(0);
                     if (firstVisibleItemView != null && firstVisibleItemView.getTop() == 0) {
-                        //滑动到顶部的操作
+                        //滑动到顶部的操作，拉到顶部会一直执行
                     }
                 } else if ((firstVisibleItem + visibleItemCount) == totalItemCount) {
                     View lastVisibleItemView = listView.getChildAt(listView.getChildCount() - 1);
                     if (lastVisibleItemView != null && lastVisibleItemView.getBottom() == listView.getHeight()) {
-                        //滑动到底部的操作
+                        try {
+
+                            final List<NewsInfo> news = NewsService.getJsonBeforeNews();//调用方法获取解析后的新闻列表
+                            List<HashMap<String, Object>> data = new ArrayList<>();
+                            if (news != null) {
+                                for (NewsInfo newsInfo : news) {
+                                    HashMap<String, Object> item = new HashMap<>();
+                                    URL picUrl = new URL(newsInfo.getImages());
+                                    Bitmap pngBM = BitmapFactory.decodeStream(picUrl.openStream());
+                                    item.put("image", pngBM);
+                                    item.put("id", newsInfo.getId());
+                                    item.put("title", newsInfo.getTitle());
+                                    data.add(item);
+                                }
+                            }
+                            listView = (ListView) findViewById(R.id.listView);
+                            //给适配器绑定数据
+                            SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, data, R.layout.activity_listview,
+                                    new String[]{"image", "title"}, new int[]{R.id.imageView, R.id.title});
+                            adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
+                                public boolean setViewValue(View arg0, Object arg1,
+                                                            String textRepresentation) {
+                                    if ((arg0 instanceof ImageView) & (arg1 instanceof Bitmap)) {
+                                        ImageView imageView = (ImageView) arg0;
+                                        Bitmap bitmap = (Bitmap) arg1;
+                                        imageView.setImageBitmap(bitmap);
+                                        return true;
+                                    } else
+                                        return false;
+                                }
+                            });
+                            listView.setAdapter(adapter);
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                     }
                 }
             }
