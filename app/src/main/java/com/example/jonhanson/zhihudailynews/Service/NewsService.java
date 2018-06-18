@@ -16,7 +16,12 @@ import java.util.Date;
 import java.util.List;
 
 public class NewsService {
-    //向知乎API发起请求获取json数据
+    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");//获取当前年月日
+    private static Date date = new Date(System.currentTimeMillis());
+    private static String beforedate = simpleDateFormat.format(date);
+    private static int num = Integer.parseInt(beforedate);
+
+    //向知乎API发起请求获取最新新闻json数据
     public static List<NewsInfo> getJsonLastNews()throws Exception{
         String path = "http://news-at.zhihu.com/api/4/news/latest";
         URL url = new URL(path);
@@ -31,7 +36,7 @@ public class NewsService {
         return null;
     }
 
-    //获取得到的新闻数据进行解析
+    //获取得到的接送新闻数据进行解析
     private static List<NewsInfo> parseJSON(InputStream inputStream) throws Exception{
         List<NewsInfo> newses = new ArrayList<>();
         byte[] data = StreamTool.read(inputStream);
@@ -61,7 +66,7 @@ public class NewsService {
         return null;
     }
 
-    //获取得到的新闻内容进行解析
+    //获取得到的json新闻内容进行解析
     private static List<NewsBody> parseWeb(InputStream inputStream) throws Exception{
         List<NewsBody> body = new ArrayList<>();
         byte[] data = StreamTool.read(inputStream);
@@ -72,13 +77,9 @@ public class NewsService {
         return body;
     }
 
-
-
+    //根据当前日期获取往日json新闻数据
     public static List<NewsInfo> getJsonBeforeNews() throws Exception{
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");//获取当前年月日
-        Date date = new Date(System.currentTimeMillis());
-        String beforedate = simpleDateFormat.format(date);
-        int num = Integer.parseInt(beforedate);
+        num--;
         String path = "http://news.at.zhihu.com/api/4/news/before/" + (num);
         URL url = new URL(path);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -87,6 +88,7 @@ public class NewsService {
         conn.setRequestProperty("User-Agent", "Mozilla/5.0");
         if (conn.getResponseCode() == 200) {
             InputStream inputStream = conn.getInputStream();
+            //解析新闻数据使用先前定义的方法
             return parseJSON(inputStream);
         }
         return null;

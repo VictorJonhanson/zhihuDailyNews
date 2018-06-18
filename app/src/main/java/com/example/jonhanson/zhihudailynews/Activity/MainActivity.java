@@ -27,7 +27,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends Activity {
-    private ListView listView;
+    private static ListView listView;
+    private static List<HashMap<String, Object>> data = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,9 +37,10 @@ public class MainActivity extends Activity {
         //关闭线程审查，使联网操作可以在主线程上进行
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+        SimpleAdapter adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
+                new String[]{"image","title"}, new int[]{R.id.imageView, R.id.title});
         try {
             final List<NewsInfo> news = NewsService.getJsonLastNews();//调用方法获取解析后的新闻列表
-            List<HashMap<String, Object>> data = new ArrayList<>();
             if (news != null) {
                 for(NewsInfo newsInfo : news){
                     HashMap<String, Object> item = new HashMap<>();
@@ -51,7 +54,7 @@ public class MainActivity extends Activity {
             }
             listView = (ListView) this.findViewById(R.id.listView);
             //给适配器绑定数据
-            SimpleAdapter adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
+            adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
                     new String[]{"image","title"}, new int[]{R.id.imageView, R.id.title});
             adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
                 public boolean setViewValue(View arg0, Object arg1,
@@ -89,6 +92,7 @@ public class MainActivity extends Activity {
         }
 
         //滑动列表到顶部以及底部的操作
+        final SimpleAdapter finalAdapter = adapter;
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
                         @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
@@ -101,9 +105,7 @@ public class MainActivity extends Activity {
                     View lastVisibleItemView = listView.getChildAt(listView.getChildCount() - 1);
                     if (lastVisibleItemView != null && lastVisibleItemView.getBottom() == listView.getHeight()) {
                         try {
-
                             final List<NewsInfo> news = NewsService.getJsonBeforeNews();//调用方法获取解析后的新闻列表
-                            List<HashMap<String, Object>> data = new ArrayList<>();
                             if (news != null) {
                                 for (NewsInfo newsInfo : news) {
                                     HashMap<String, Object> item = new HashMap<>();
@@ -114,27 +116,12 @@ public class MainActivity extends Activity {
                                     item.put("title", newsInfo.getTitle());
                                     data.add(item);
                                 }
+                                finalAdapter.notifyDataSetChanged();
                             }
-                            listView = (ListView) findViewById(R.id.listView);
-                            //给适配器绑定数据
-                            SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, data, R.layout.activity_listview,
-                                    new String[]{"image", "title"}, new int[]{R.id.imageView, R.id.title});
-                            adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
-                                public boolean setViewValue(View arg0, Object arg1,
-                                                            String textRepresentation) {
-                                    if ((arg0 instanceof ImageView) & (arg1 instanceof Bitmap)) {
-                                        ImageView imageView = (ImageView) arg0;
-                                        Bitmap bitmap = (Bitmap) arg1;
-                                        imageView.setImageBitmap(bitmap);
-                                        return true;
-                                    } else
-                                        return false;
-                                }
-                            });
-                            listView.setAdapter(adapter);
                         } catch (Exception e) {
                                 e.printStackTrace();
                             }
+
                     }
                 }
             }
@@ -145,8 +132,6 @@ public class MainActivity extends Activity {
             }
         });
     }
-
-
 
     //连续点击两次返回键退出应用
     private static Boolean isQuit = false;
