@@ -29,6 +29,7 @@ import java.util.TimerTask;
 public class MainActivity extends Activity {
     private static ListView listView;
     private static List<HashMap<String, Object>> data = new ArrayList<>();
+    private static List<NewsInfo> news, beforenews;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +41,7 @@ public class MainActivity extends Activity {
         SimpleAdapter adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
                 new String[]{"image","title"}, new int[]{R.id.imageView, R.id.title});
         try {
-            final List<NewsInfo> news = NewsService.getJsonLastNews();//调用方法获取解析后的新闻列表
+            news = NewsService.getJsonLastNews();//调用方法获取解析后的新闻列表
             if (news != null) {
                 for(NewsInfo newsInfo : news){
                     HashMap<String, Object> item = new HashMap<>();
@@ -94,7 +95,7 @@ public class MainActivity extends Activity {
         //滑动列表到顶部以及底部的操作
         final SimpleAdapter finalAdapter = adapter;
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                        @Override
+            @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (firstVisibleItem == 0) {
                     View firstVisibleItemView = listView.getChildAt(0);
@@ -105,9 +106,9 @@ public class MainActivity extends Activity {
                     View lastVisibleItemView = listView.getChildAt(listView.getChildCount() - 1);
                     if (lastVisibleItemView != null && lastVisibleItemView.getBottom() == listView.getHeight()) {
                         try {
-                            final List<NewsInfo> news = NewsService.getJsonBeforeNews();//调用方法获取解析后的新闻列表
-                            if (news != null) {
-                                for (NewsInfo newsInfo : news) {
+                            beforenews = NewsService.getJsonBeforeNews();//调用方法获取解析后的新闻列表
+                            if (beforenews != null) {
+                                for (NewsInfo newsInfo : beforenews) {
                                     HashMap<String, Object> item = new HashMap<>();
                                     URL picUrl = new URL(newsInfo.getImages());
                                     Bitmap pngBM = BitmapFactory.decodeStream(picUrl.openStream());
@@ -120,8 +121,7 @@ public class MainActivity extends Activity {
                             }
                         } catch (Exception e) {
                                 e.printStackTrace();
-                            }
-
+                        }
                     }
                 }
             }
