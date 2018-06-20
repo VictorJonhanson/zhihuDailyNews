@@ -27,9 +27,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends Activity {
-    private static ListView listView;
+    private ListView listView;
     private static List<HashMap<String, Object>> data = new ArrayList<>();
-    private static List<NewsInfo> news, beforenews;
+    private static List<NewsInfo> news;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
                     data.add(item);
                 }
             }
-            listView = (ListView) this.findViewById(R.id.listView);
+            listView = this.findViewById(R.id.listView);
             //给适配器绑定数据
             adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
                     new String[]{"image","title"}, new int[]{R.id.imageView, R.id.title});
@@ -106,9 +106,9 @@ public class MainActivity extends Activity {
                     View lastVisibleItemView = listView.getChildAt(listView.getChildCount() - 1);
                     if (lastVisibleItemView != null && lastVisibleItemView.getBottom() == listView.getHeight()) {
                         try {
-                            beforenews = NewsService.getJsonBeforeNews();//调用方法获取解析后的新闻列表
-                            if (beforenews != null) {
-                                for (NewsInfo newsInfo : beforenews) {
+                            news = NewsService.getJsonBeforeNews();//调用方法获取解析后的新闻列表
+                            if (news != null) {
+                                for (NewsInfo newsInfo : news) {
                                     HashMap<String, Object> item = new HashMap<>();
                                     URL picUrl = new URL(newsInfo.getImages());
                                     Bitmap pngBM = BitmapFactory.decodeStream(picUrl.openStream());
