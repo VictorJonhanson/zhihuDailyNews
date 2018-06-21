@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
         //关闭线程审查，使联网操作可以在主线程上进行
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        SimpleAdapter adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
+        final SimpleAdapter adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
                 new String[]{"image","title"}, new int[]{R.id.imageView, R.id.title});
         try {
             news = NewsService.getJsonLastNews();//调用方法获取解析后的新闻列表
@@ -54,9 +54,6 @@ public class MainActivity extends Activity {
                 }
             }
             listView = this.findViewById(R.id.listView);
-            //给适配器绑定数据
-            adapter = new SimpleAdapter(this, data, R.layout.activity_listview,
-                    new String[]{"image","title"}, new int[]{R.id.imageView, R.id.title});
             adapter.setViewBinder(new SimpleAdapter.ViewBinder() {
                 public boolean setViewValue(View arg0, Object arg1,
                                             String textRepresentation) {
@@ -93,7 +90,6 @@ public class MainActivity extends Activity {
         }
 
         //滑动列表到顶部以及底部的操作
-        final SimpleAdapter finalAdapter = adapter;
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
@@ -117,7 +113,7 @@ public class MainActivity extends Activity {
                                     item.put("title", newsInfo.getTitle());
                                     data.add(item);
                                 }
-                                finalAdapter.notifyDataSetChanged();
+                                adapter.notifyDataSetChanged();
                             }
                         } catch (Exception e) {
                                 e.printStackTrace();
