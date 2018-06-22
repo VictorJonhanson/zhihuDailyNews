@@ -72,8 +72,8 @@ public class MainActivity extends Activity {
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    NewsInfo newsInfo = news.get(position);
-                    String newsid = newsInfo.getId();
+                    HashMap<String, Object> news = data.get(position);
+                    String newsid = news.get("id").toString();
                     try {
                         List<NewsBody> body = NewsService.ShowDetail(newsid);//传递参数给显示详情方法，参数为新闻id
                         String bodystr = (body.get(0).getBody());
@@ -115,6 +115,23 @@ public class MainActivity extends Activity {
                                 }
                                 adapter.notifyDataSetChanged();
                             }
+                            //新闻列表的点击详情事件处理
+                            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                    HashMap<String, Object> news = data.get(position);
+                                    String newsid = news.get("id").toString();
+                                    try {
+                                        List<NewsBody> body = NewsService.ShowDetail(newsid);//传递参数给显示详情方法，参数为新闻id
+                                        String bodystr = (body.get(0).getBody());
+                                        Intent intent = new Intent(MainActivity.this, WebActivity.class);
+                                        intent.putExtra("body", bodystr);
+                                        startActivity(intent);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
                         } catch (Exception e) {
                                 e.printStackTrace();
                         }
