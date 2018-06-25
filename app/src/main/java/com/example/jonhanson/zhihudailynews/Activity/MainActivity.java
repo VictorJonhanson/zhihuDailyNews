@@ -56,6 +56,10 @@ public class MainActivity extends Activity {
                     return;
                 }
                 currentIndex++;
+                if(currentIndex >= 5){
+                    currentIndex = -1;
+                    currentIndex++;
+                }
                 viewPager.setCurrentItem(currentIndex);
             }
         }
