@@ -1,11 +1,12 @@
 package com.example.jonhanson.zhihudailynews.Model;
 
-public class NewsInfo {
+public class NewsInfo{
     private String images;//新闻列表的图片地址
     private String id;//新闻的id
     private String title;//新闻的标题
 
-    public NewsInfo(){}
+    public NewsInfo(){
+    }
 
     public NewsInfo(String images, String id, String title){
         this.images = images;
