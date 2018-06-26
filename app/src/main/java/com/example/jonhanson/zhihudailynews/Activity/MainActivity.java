@@ -46,6 +46,7 @@ public class MainActivity extends Activity {
     private boolean isTouch = false;
     private boolean isAuto = true;
 
+   //轮播设置页面为指定页面
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler(){
         @Override
@@ -65,6 +66,20 @@ public class MainActivity extends Activity {
         }
     };
 
+    //轮播图片停滞时间
+    Thread thread = new Thread(new Runnable() {
+        public void run() {
+            while(isAuto){
+                try {
+                    Thread.sleep(5 * 1000);//5秒
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                handler.sendEmptyMessage(0);
+            }
+        }
+    });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +88,7 @@ public class MainActivity extends Activity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+        //轮播图片初始化
         thread.start();
         View view = LayoutInflater.from(this).inflate(R.layout.layout_headloop, null);
         viewPager = view.findViewById(R.id.viewpager);
@@ -95,7 +111,7 @@ public class MainActivity extends Activity {
                         @Override
                         public void onClick(View v) {
                             try {
-                                List<NewsBody> body = NewsService.ShowDetail(ids[finalI - 1]);//传递参数给显示详情方法，参数为新闻id
+                                List<NewsBody> body = NewsService.ShowDetail(ids[finalI - 1]);//传递参数给显示详情方法，参数为新闻ids数组
                                 String bodystr = (body.get(0).getBody());
                                 Intent intent = new Intent(MainActivity.this, WebActivity.class);
                                 intent.putExtra("body", bodystr);
@@ -118,9 +134,13 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
+        //轮播页面监听器
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            //轮播页面滑动调用
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                //标题随轮播图片转动而变化
+
                 title.setText(titles[position]);
             }
 
@@ -217,7 +237,7 @@ public class MainActivity extends Activity {
                             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                    HashMap<String, Object> news = data.get(position);
+                                    HashMap<String, Object> news = data.get(position - 1);
                                     String newsid = news.get("id").toString();
                                     try {
                                         List<NewsBody> body = NewsService.ShowDetail(newsid);//传递参数给显示详情方法，参数为新闻id
@@ -263,6 +283,7 @@ public class MainActivity extends Activity {
         }
     }
 
+    //轮播界面适配器
     private class MyPagerAdapter extends PagerAdapter {
         @Override
         public int getCount() {
@@ -294,17 +315,4 @@ public class MainActivity extends Activity {
         }
 
     }
-
-    Thread thread = new Thread(new Runnable() {
-        public void run() {
-            while(isAuto){
-                try {
-                    Thread.sleep(5 * 1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                handler.sendEmptyMessage(0);
-            }
-        }
-    });
 }
